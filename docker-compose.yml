@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  browser-n8n-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LOG_LEVEL=INFO
+      # Set to true to see the browser during execution
+      - BROWSER_USE_HEADFUL=${BROWSER_USE_HEADFUL:-false}
+    volumes:
+      # Optional: mount local directory to persist data
+      - ./data:/app/data
+    restart: unless-stopped 
