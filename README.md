@@ -88,13 +88,51 @@ curl -X PUT http://localhost:8000/api/v1/stop-task/{task_id}
 
 ## Configuration Options
 
-You can configure the service by editing the `.env` file. Available options include:
+You can configure the service by editing the `.env` file.  Available options are grouped below:
 
-- `PORT`: The port the service will run on (default: 8000)
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `ANTHROPIC_API_KEY`: Your Anthropic API key
-- `LOG_LEVEL`: Logging level (default: INFO)
-- `BROWSER_USE_HEADFUL`: Set to "true" to run browser in headful mode
+### API Configuration
+
+- `PORT`: The port the service will run on (default: 8000).
+
+### LLM Provider Configuration
+
+#### OpenAI
+
+- `OPENAI_API_KEY`: Your OpenAI API key.
+- `OPENAI_MODEL_ID`: The model to use (e.g., `gpt-4o`).
+- `OPENAI_BASE_URL`: Optional custom endpoint for OpenAI compatible APIs.
+
+#### Anthropic
+
+- `ANTHROPIC_API_KEY`: Your Anthropic API key.
+- `ANTHROPIC_MODEL_ID`: The model to use (e.g., `claude-3-opus-20240229`).
+
+#### MistralAI
+
+- `MISTRAL_API_KEY`: Your MistralAI API key.
+- `MISTRAL_MODEL_ID`: The model to use (e.g., `mistral-large-latest`).
+
+#### Google AI
+
+- `GOOGLE_API_KEY`: Your Google AI API key.
+- `GOOGLE_MODEL_ID`: The model to use (e.g., `gemini-1.5-pro`).
+
+#### Ollama
+
+- `OLLAMA_API_BASE`: The base URL for your Ollama instance.
+- `OLLAMA_MODEL_ID`: The model to use (e.g., `llama3`).
+
+#### Azure OpenAI
+
+- `AZURE_API_KEY`: Your Azure OpenAI API key.
+- `AZURE_ENDPOINT`: Your Azure OpenAI endpoint URL.
+- `AZURE_DEPLOYMENT_NAME`: Your deployment name.
+- `AZURE_API_VERSION`: API version to use.
+
+### Optional Configuration
+
+- `LOG_LEVEL`: Logging level (default: `INFO`).
+- `BROWSER_USE_HEADFUL`: Set to `"true"` to run the browser in headful mode (default: `false`, runs in headless mode).
 
 ## Troubleshooting
 

@@ -139,7 +139,7 @@ async def execute_task(task_id: str, instruction: str, ai_provider: str):
         tasks[task_id]["status"] = TaskStatus.RUNNING
         
         # Get LLM
-        llm = get_llm('google')
+        llm = get_llm(ai_provider)
         
         # Configure agent options
         agent_kwargs = {
