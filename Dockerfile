@@ -30,8 +30,6 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers
-RUN playwright install
 # Copy the rest of the application
 COPY . .
 
@@ -46,7 +44,11 @@ RUN adduser --disabled-password --gecos "" appuser
 # Give appuser permissions to the necessary directories
 RUN chown -R appuser:appuser /app
 
+# Switch to appuser before installing browsers
 USER appuser
+
+# Install Playwright browsers
+RUN playwright install
 
 # Set healthcheck to ensure the service is running properly
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8000/api/v1/ping || exit 1
