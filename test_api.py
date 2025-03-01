@@ -9,14 +9,14 @@ import requests
 import time
 import sys
 
-def test_api(base_url, task, ai_provider):
+def test_api(base_url, task, ai_provider, headful):
     print(f"Testing Browser Use Bridge API at {base_url}")
     
     # 1. Start a task
     print("\n1. Starting a new task...")
     response = requests.post(
         f"{base_url}/api/v1/run-task",
-        json={"task": task, "ai_provider": ai_provider}
+        json={"task": task, "ai_provider": ai_provider, "headful": headful}
     )
     
     if response.status_code != 200:
@@ -69,6 +69,6 @@ if __name__ == "__main__":
     parser.add_argument("--url", default="http://localhost:8000/api/v1", help="Base URL for the API")
     parser.add_argument("--task", default="Go to google.com and search for 'n8n automation'", help="Task to perform")
     parser.add_argument("--provider", default="openai", choices=["openai", "anthropic", "mistral", "google", "ollama", "azure"], help="AI provider to use")
-    
+    parser.add_argument("--headful", action="store_true", help="Run the browser in headful mode")
     args = parser.parse_args()
-    sys.exit(test_api(args.url, args.task, args.provider)) 
+    sys.exit(test_api(args.url, args.task, args.provider, args.headful)) 
