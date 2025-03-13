@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     procps \
     unzip \
-    # Additional dependencies that Playwright might need
     libnss3 \
     libnspr4 \
     libatk1.0-0 \
@@ -39,19 +38,18 @@ RUN mkdir -p /app/data && chmod 777 /app/data
 # Expose the port the app runs on
 EXPOSE 8000
 
+# Install Playwright browsers (Run as root)
+RUN playwright install
+
 # Create a non-root user to run the app
 RUN adduser --disabled-password --gecos "" appuser
-# Give appuser permissions to the necessary directories
 RUN chown -R appuser:appuser /app
 
-# Switch to appuser before installing browsers
+# Switch to appuser
 USER appuser
-
-# Install Playwright browsers
-RUN playwright install
 
 # Set healthcheck to ensure the service is running properly
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8000/api/v1/ping || exit 1
 
-# Command to run the application
-CMD ["python", "app.py"] 
+# Run the app (Use Gunicorn if it's FastAPI/Flask)
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app:app", "--bind", "0.0.0.0:8000"]
