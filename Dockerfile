@@ -3,27 +3,26 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install essential packages and dependencies needed for Playwright
+# Install Playwright system dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
-    procps \
-    unzip \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
-    libxfixes3 \
     libxrandr2 \
     libgbm1 \
     libasound2 \
+    libpangocairo-1.0-0 \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright browsers
+RUN pip install playwright && playwright install --with-deps
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
@@ -39,6 +38,10 @@ RUN mkdir -p /app/data && chmod 777 /app/data
 EXPOSE 8000
 
 # Install Playwright browsers (Run as root)
+# Switch to appuser before installing browsers
+USER appuser
+
+# Install Playwright browsers
 RUN playwright install
 
 # Create a non-root user to run the app
