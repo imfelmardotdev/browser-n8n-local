@@ -28,6 +28,15 @@ RUN apt-get update && apt-get install -y \
     libasound2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+    
+# Install Google Chrome
+RUN wget -q -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get update \
+    && apt-get install -y ./chrome.deb \
+    && rm chrome.deb
+
+# Verify Chrome installation
+RUN google-chrome --version
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
