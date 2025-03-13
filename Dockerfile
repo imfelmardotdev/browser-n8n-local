@@ -35,6 +35,9 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
+# Install Playwright **before** switching users
+RUN pip install playwright && playwright install --with-deps
+
 # Copy the rest of the application
 COPY . .
 
@@ -55,9 +58,6 @@ USER appuser
 
 # Ensure `uvicorn` is in PATH for the non-root user
 ENV PATH="/home/appuser/.local/bin:$PATH"
-
-# Install Playwright browsers (run as appuser)
-RUN playwright install --with-deps
 
 # Set healthcheck to ensure the service is running properly
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8000/api/v1/ping || exit 1
