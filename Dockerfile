@@ -23,19 +23,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+
 # Install Playwright and required dependencies
 RUN pip install --no-cache-dir playwright && playwright install --with-deps
-
-# Create a non-root user
-RUN useradd -m appuser
-RUN chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
-
-# Copy requirements first (for better caching)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY . .
@@ -43,11 +36,18 @@ COPY . .
 # Ensure the data directory exists and has correct permissions
 RUN mkdir -p /app/data && chmod 777 /app/data
 
+# Create a non-root user
+RUN useradd -m appuser
+RUN chown -R appuser:appuser /app
+
 # Expose the application port
 EXPOSE 8000
 
-# Healthcheck for Coolify
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8000/api/v1/ping || exit 1
+# Ensure `uvicorn` is accessible
+ENV PATH="/home/appuser/.local/bin:$PATH"
 
-# Run the FastAPI app with Uvicorn (better than Gunicorn for lightweight setups)
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run as non-root user
+USER appuser
+
+# Run the FastAPI app with Uvicorn
+CMD ["python", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
