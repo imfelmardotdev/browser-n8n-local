@@ -1,8 +1,10 @@
+# Use the official Python image as the base
 FROM python:3.11-slim
 
+# Set the working directory
 WORKDIR /app
 
-# Install Playwright system dependencies
+# Install system dependencies for Playwright
 RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libcairo2 \
@@ -20,31 +22,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright and required dependencies
-RUN pip install --no-cache-dir playwright && playwright install --with-deps
-
-# Create a non-root user and set permissions
-RUN adduser --disabled-password --gecos "" appuser
-RUN chown -R appuser:appuser /app
-
-# Copy requirements first to leverage Docker cache
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
+# Install Playwright and its dependencies
+RUN pip install playwright && playwright install --with-deps
+
+# Copy the application code
 COPY . .
 
-# Create a data directory with proper permissions
-RUN mkdir -p /app/data && chmod 777 /app/data
-
-# Expose the port the app runs on
+# Expose the application port
 EXPOSE 8000
 
-# Set healthcheck to ensure the service is running properly
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8000/api/v1/ping || exit 1
-
-# Switch to non-root user
-USER appuser
-
-# Run the app (Use Gunicorn for FastAPI)
+# Run the application using Gunicorn with Uvicorn workers
 CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app:app", "--bind", "0.0.0.0:8000"]
