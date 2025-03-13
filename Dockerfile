@@ -1,10 +1,10 @@
-# Use the official Python image as the base
+# Use a slim Python 3.11 base image
 FROM python:3.11-slim
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies for Playwright
+# Install system dependencies required for Playwright
 RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libcairo2 \
@@ -19,21 +19,35 @@ RUN apt-get update && apt-get install -y \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
     libcups2 \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Playwright and required dependencies
+RUN pip install --no-cache-dir playwright && playwright install --with-deps
+
+# Create a non-root user
+RUN useradd -m appuser
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Copy requirements first (for better caching)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Install Playwright and its dependencies
-RUN pip install playwright && playwright install --with-deps
 
 # Copy the application code
 COPY . .
 
+# Ensure the data directory exists and has correct permissions
+RUN mkdir -p /app/data && chmod 777 /app/data
+
 # Expose the application port
 EXPOSE 8000
 
-# Run the application using Gunicorn with Uvicorn workers
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app:app", "--bind", "0.0.0.0:8000"]
+# Healthcheck for Coolify
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8000/api/v1/ping || exit 1
+
+# Run the FastAPI app with Uvicorn (better than Gunicorn for lightweight setups)
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
